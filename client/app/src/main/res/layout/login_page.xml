@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.ipromise.MainActivity">
+    tools:context="com.ipromise.LoginPageActivity">
 
     <EditText
         android:id="@+id/username"
@@ -19,14 +19,6 @@
         android:layout_height="wrap_content"
         android:hint="enter_something" />
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="This is just a demo of Android interaction with Python Flask web app"
-        android:textSize="16sp" />
-
     <Button
         android:id="@+id/btnREGISTER"
         android:layout_width="wrap_content"
@@ -38,11 +30,4 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login" />
-
-    <Button
-        android:id="@+id/btnGET"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GET" />
-
 </LinearLayout>

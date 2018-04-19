@@ -1,11 +1,11 @@
-# use "pip freeze -r requirements.txt"
-
+use "pip freeze -r requirements.txt"
 click==6.7
 Flask==0.12.2
+Flask-JWT-Extended==3.8.1
 Flask-SQLAlchemy==2.3.2
 itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
-mysqlclient==1.3.12
+PyJWT==1.6.1
 SQLAlchemy==1.2.6
 Werkzeug==0.14.1
