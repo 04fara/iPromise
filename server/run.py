@@ -152,16 +152,16 @@ def remove_post():
 @jwt_required
 def get_posts():
     json = request.get_json()
-    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     try:
-        if json['feed']:
-            return jsonify({'posts': [_.serialize for _ in current_user.followed_posts]})
-        else:
+        if json['user_name']:
             return jsonify({
                 'posts':
                     [_.serialize for _ in
-                     Posts.query.filter_by(user_name=current_user).order_by(Posts.timestamp.desc())]
+                     Posts.query.filter_by(user_name=json['user_name']).order_by(Posts.timestamp.desc())]
             })
+        else:
+            current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+            return jsonify({'posts': [_.serialize for _ in current_user.followed_posts]})
     except:
         return jsonify({'message': 'Something went wrong'})
 
