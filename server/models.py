@@ -1,12 +1,13 @@
 from datetime import datetime
 
-from flask import jsonify, Flask
+from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder='files')
 app.config.from_pyfile('config.py')
+
 jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
@@ -22,28 +23,20 @@ class Users(db.Model):
     user_name = db.Column(db.String(40), index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
-    goals = db.relationship('Goals', backref='author', lazy='dynamic')
-
     followed = db.relationship(
         'Users', secondary=followers,
         primaryjoin=(followers.c.follower_id == user_id),
         secondaryjoin=(followers.c.followed_id == user_id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
-    def get_id(self):
-        return self.user_name
+    posts = db.relationship('Posts', backref='author', lazy='dynamic')
 
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return True
-
-    @property
-    def is_anonymous(self):
-        return False
+    def followed_posts(self):
+        own = Posts.query.filter_by(user_id=self.id)
+        followed = Posts.query.join(
+            followers, (followers.c.followed_id == Posts.user_id)).filter(
+            followers.c.follower_id == self.id)
+        return followed.union(own).order_by(Posts.timestamp.desc())
 
     @property
     def password(self):
@@ -53,12 +46,14 @@ class Users(db.Model):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def __init__(self, user_name, password):
-        self.user_name = user_name
-        self.password = password
-
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def add_post(self, post):
+        return self.posts.append(post)
+
+    def remove_post(self, post):
+        return self.posts.remove(post)
 
     def follow(self, user):
         if not self.is_following(user):
@@ -74,21 +69,29 @@ class Users(db.Model):
 
     @property
     def serialize(self):
-        return {
-            'user_id': self.user_id,
-            'user_name': self.user_name,
-        }
+        return self.__repr__()
 
     def __repr__(self):
-        return jsonify({'user_id': self.user_id, 'user_name': self.user_name})
+        return {'user_id': self.user_id, 'user_name': self.user_name}
 
 
-class Goals(db.Model):
-    goalId = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(Users.user_id), nullable=False, primary_key=True)
-    goalTitle = db.Column(db.String(40), nullable=False, unique=True)
+class Posts(db.Model):
+    post_id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    user_name = db.Column(db.String(40), db.ForeignKey(Users.user_name), nullable=False, primary_key=True)
+    title = db.Column(db.String(40), nullable=False, unique=True)
+    description = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.utcnow)
     deadline = db.Column(db.DateTime, nullable=False)
+    received_from = db.Column(db.Integer, db.ForeignKey(Users.user_id))
+
+    @property
+    def serialize(self):
+        return self.__repr__()
 
     def __repr__(self):
-        return jsonify({'Title': self.user_name, 'Posted on': self.timestamp, 'Deadline': self.deadline})
+        if self.received_from is None:
+            return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
+                    'timestamp': self.timestamp, 'deadline': self.deadline}
+        else:
+            return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
+                    'timestamp': self.timestamp, 'deadline': self.deadline, 'received_from': self.received_from}

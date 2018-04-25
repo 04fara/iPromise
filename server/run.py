@@ -1,18 +1,44 @@
 from flask import request, jsonify
 from flask_jwt_extended import (
-    jwt_required, create_access_token,
-    get_jwt_identity,
-    create_refresh_token)
+    get_jwt_identity, jwt_required, create_access_token)
 
-from models import Users, app, db
+from models import Users, app, db, Posts, jwt
 
 
-@app.route('/user', methods=['POST'])
+@jwt.expired_token_loader
+def expiration():
+    return jsonify({
+        'status': 401,
+        'msg': 'The token has expired'
+    }), 401
+
+
+@jwt.invalid_token_loader
+def invalid():
+    return jsonify({
+        'status': 403,
+        'msg': 'Invalid token'
+    }), 403
+
+
+@jwt.unauthorized_loader
+def unauthorize():
+    return jsonify({
+        'status': 401,
+        'msg': 'Unauthorized'
+    }), 401
+
+
+db.create_all()
+
+
+@app.route('/user', methods=['GET'])
+@jwt_required
 def index():
     print(request.headers)
     print("ASDASD")
-    current_user = get_jwt_identity()
-    return current_user.user_name
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    return jsonify(current_user.serialize)
     # if not current_user.is_authenticated:
     #     return str(current_user.user_id)
     # else:
@@ -31,16 +57,9 @@ def register():
     try:
         db.session.add(user)
         db.session.commit()
-        # access_token = create_access_token(identity=user.user_name)
-        # refresh_token = create_refresh_token(identity=user.user_name)
-        # return jsonify({
-        #     'message': 'User %s was created' % user.user_name,
-        #     'access_token': access_token,
-        #     'refresh_token': refresh_token
-        # })
         return jsonify({'message': 'User %s was created.' % user.user_name})
     except:
-        return jsonify({'message': 'Something went wrong'}, 500)
+        return jsonify({'message': 'Something went wrong'}), 500
 
 
 @app.route('/login', methods=['POST'])
@@ -50,59 +69,101 @@ def login():
     if not user:
         return jsonify({'message': 'User "%s" does not exist!' % json['user_name']})
     if user is not None and user.verify_password(json['password']):
-        # access_token = create_access_token(identity=user.user_name)
-        # refresh_token = create_refresh_token(identity=user.user_name)
-        # return jsonify({
-        #     'message': 'Logged in as %s' % current_user.user_name,
-        #     'access_token': access_token,
-        #     'refresh_token': refresh_token
-        # })
-        return jsonify({'message': 'Logged in as %s.' % user.user_name})
+        access_token = create_access_token(identity=user.user_name)
+        return jsonify({'message': 'Logged in as %s.' % user.user_name, 'access_token': access_token})
     else:
         return jsonify({'message': 'Wrong credentials'})
 
 
 @app.route('/friends', methods=['POST'])
+@jwt_required
 def users_list():
+    current_user = get_jwt_identity()
     users = Users.query.order_by(Users.user_name).all()
     return jsonify([_.serialize for _ in users])
 
 
 @app.route('/follow', methods=['POST'])
+@jwt_required
 def follow():
     json = request.get_json()
-    print(json)
-    follower = Users.query.filter_by(user_name=json['follower']).first()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     followed = Users.query.filter_by(user_name=json['followed']).first()
     try:
-        follower.follow(followed)
+        current_user.follow(followed)
         db.session.commit()
         return str(True)
-    except Exception as ex:
+    except:
         return jsonify({'message': 'Something went wrong'})
 
 
 @app.route('/unfollow', methods=['POST'])
+@jwt_required
 def unfollow():
     json = request.get_json()
-    follower = Users.query.filter_by(user_name=json['follower']).first()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     followed = Users.query.filter_by(user_name=json['followed']).first()
     try:
-        follower.unfollow(followed)
+        current_user.unfollow(followed)
         db.session.commit()
         return str(True)
-    except Exception as ex:
+    except:
         return jsonify({'message': 'Something went wrong'})
 
 
 @app.route('/is_following', methods=['POST'])
+@jwt_required
 def is_following():
     json = request.get_json()
-    current_user = Users.query.filter_by(user_name=json['follower']).first()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     other_user = Users.query.filter_by(user_name=json['followed']).first()
     if current_user == other_user:
         return 'It is you'
     return str(current_user.is_following(other_user))
+
+
+@app.route('/add_post', methods=['POST'])
+@jwt_required
+def add_post():
+    json = request.get_json()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    post = Posts(user_name=current_user, title=json['title'], deadline=json['deadline'])
+    try:
+        current_user.add_post(post)
+        return jsonify({'message': 'Post was created.'})
+    except:
+        return jsonify({'message': 'Something went wrong'}, 500)
+
+
+@app.route('/remove_post', methods=['POST'])
+@jwt_required
+def remove_post():
+    json = request.get_json()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    post = Posts.query.filter_by(post_id=json['post_id']).first()
+    try:
+        current_user.remove_post(post)
+        return jsonify({'message': 'Post was deleted.'})
+    except:
+        return jsonify({'message': 'Something went wrong'}, 500)
+
+
+@app.route('/get_posts', methods=['POST'])
+@jwt_required
+def get_posts():
+    json = request.get_json()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    try:
+        if json['feed']:
+            return jsonify({'posts': [_.serialize for _ in current_user.followed_posts]})
+        else:
+            return jsonify({
+                'posts':
+                    [_.serialize for _ in
+                     Posts.query.filter_by(user_name=current_user).order_by(Posts.timestamp.desc())]
+            })
+    except:
+        return jsonify({'message': 'Something went wrong'})
 
 
 if __name__ == '__main__':
