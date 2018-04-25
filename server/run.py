@@ -34,8 +34,8 @@ def index():
     #print(request.headers)
     #print("ASDASD")
     
-    current_user = get_jwt_identity()
-    return jsonify(current_user)
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    return jsonify(current_user.serialize)
     
     #if not current_user.is_authenticated:
     #    return str(current_user.user_id)
@@ -44,6 +44,12 @@ def index():
     #     return str(current_user.user_id)
     # return file.save(os.path.join(app.static_folder), secure_filename(u'i contain cool text.txt'))
 
+@app.route("/findByName",methods=['GET'])
+@jwt_required
+def search():
+    json = request.get_json()
+    users = db.session.query(Users).filter(Users.user_name.op("regexp")(json['regexp']))
+    return jsonify([_.serialize for _ in users]),200
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -153,6 +159,10 @@ def addPost():
     db.session.commit()
     return jsonify([_.serialize() for _ in curUser.goals])
 
+@app.route("/all_users",methods=['GET'])
+def users():
+    users=Users.query.all()
+    return jsonify([_.serialize for _ in users]),200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
