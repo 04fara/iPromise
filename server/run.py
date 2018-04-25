@@ -7,14 +7,14 @@ from flask_jwt_extended import (
 from models import Users,Goals,Comments,followers, app, db,jwt
 
 @jwt.expired_token_loader
-def expiration():
+def expiration(self):
     return jsonify({
         'status': 401,
         'msg': 'The token has expired'
     }), 401
 
 @jwt.invalid_token_loader
-def invalid():
+def invalid(self):
     return jsonify({
         'status': 403,
         'msg': 'Invalid token'
@@ -168,6 +168,8 @@ def users():
     for friend in curUser.followed:
         for goal in friend.goals:
             valueToReturn.append(goal.serialize())
+    for goal in curUser.goals:
+        valueToReturn.append(goal.serialize())
     valueToReturn.sort(key=lambda x : x['Posted on'] ,reverse=True)
     return jsonify(valueToReturn),200
 
