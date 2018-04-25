@@ -12,8 +12,8 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
 followers = db.Table('followers',
-                     db.Column('follower_id', db.Integer, db.ForeignKey('users.user_id')),
-                     db.Column('followed_id', db.Integer, db.ForeignKey('users.user_id'))
+                     db.Column('follower_id', db.Integer, db.ForeignKey('users.user_id'),primary_key=True),
+                     db.Column('followed_id', db.Integer, db.ForeignKey('users.user_id'),primary_key=True)
                      )
 
 
@@ -26,12 +26,12 @@ class Users(db.Model):
 
     followed = db.relationship(
         'Users', secondary=followers,
-        primaryjoin=(followers.c.follower_id == user_id),
-        secondaryjoin=(followers.c.followed_id == user_id),
+        primaryjoin=followers.c.follower_id == user_id,
+        secondaryjoin=followers.c.followed_id == user_id,
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
     def get_id(self):
-        return self.user_name
+        return self.user_id
 
     @property
     def is_authenticated(self):
@@ -89,6 +89,33 @@ class Goals(db.Model):
     goalTitle = db.Column(db.String(40), nullable=False, unique=True)
     timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.utcnow)
     deadline = db.Column(db.DateTime, nullable=False)
+    text = db.Column(db.Text,nullable=False)
 
     def __repr__(self):
-        return jsonify({'Title': self.user_name, 'Posted on': self.timestamp, 'Deadline': self.deadline})
+        return jsonify(self.serialize())
+
+    def serialize(self):
+        return {
+            'Title': self.goalTitle,
+            'Posted on': self.timestamp,
+            'Deadline': self.deadline,
+            'Goal': self.text
+        }
+
+class Comments(db.Model):
+    commentId = db.Column(db.Integer,autoincrement=True,primary_key=True)
+    postId = db.Column(db.Integer,db.ForeignKey(Goals.goalId),primary_key=True)
+    postOwner = db.Column(db.Integer,db.ForeignKey(Users.user_id),primary_key=True) 
+    owner = db.Column(db.Integer,db.ForeignKey(Users.user_id),nullable=False)
+    timestamp = db.Column(db.DateTime,index=True,nullable=True,default=datetime.utcnow)
+    text = db.Column(db.Text,nullable=False)
+
+    def serialize(self):
+        return {
+            'Comment Owner': self.owner,
+            'Created at': self.timestamp,
+            'Comment': self.text
+        }
+    
+    def __repr__(self):
+        return jsonify(self.serialize())
