@@ -45,7 +45,7 @@ def index():
     # return file.save(os.path.join(app.static_folder), secure_filename(u'i contain cool text.txt'))
 
 @app.route("/findByName",methods=['GET'])
-@jwt_required
+#@jwt_required
 def search():
     json = request.get_json()
     users = db.session.query(Users).filter(Users.user_name.op("regexp")(json['regexp']))
@@ -152,17 +152,24 @@ def is_following():
 @jwt_required
 def addPost():
     json = request.get_json()
-    curUser = Users.query.filter_by(user_name = get_jwt_identity()).first()
-    newPost = Goals(user_id=curUser.user_id,goalTitle=json['title'],deadline=json['deadline'],text=json['text'])
+    name = get_jwt_identity()
+    curUser = Users.query.filter_by(user_name=name).first()
+    newPost = Goals(user_id=curUser.user_id,goalTitle=json['title'],userName=name,deadline=json['deadline'],text=json['text'])
     db.session.add(newPost)
     curUser.goals.append(newPost)
     db.session.commit()
     return jsonify([_.serialize() for _ in curUser.goals])
 
-@app.route("/all_users",methods=['GET'])
+@app.route("/getFeed",methods=['GET'])
+@jwt_required
 def users():
-    users=Users.query.all()
-    return jsonify([_.serialize for _ in users]),200
+    curUser = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    valueToReturn = []
+    for friend in curUser.followed:
+        for goal in friend.goals:
+            valueToReturn.append(goal.serialize())
+    valueToReturn.sort(key=lambda x : x['Posted on'] ,reverse=True)
+    return jsonify(valueToReturn),200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

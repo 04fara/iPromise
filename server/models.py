@@ -86,6 +86,7 @@ class Users(db.Model):
 class Goals(db.Model):
     goalId = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(Users.user_id), nullable=False, primary_key=True)
+    userName = db.Column(db.String(40),nullable=False, unique=False)
     goalTitle = db.Column(db.String(40), nullable=False, unique=True)
     timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.utcnow)
     deadline = db.Column(db.DateTime, nullable=False)
@@ -96,6 +97,7 @@ class Goals(db.Model):
 
     def serialize(self):
         return {
+            'owner': self.userName,
             'Title': self.goalTitle,
             'Posted on': self.timestamp,
             'Deadline': self.deadline,
