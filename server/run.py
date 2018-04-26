@@ -53,10 +53,11 @@ def search():
 
 @app.route('/register', methods=['POST'])
 def register():
+
     json = request.get_json()
     user = Users.query.filter_by(user_name=json['user_name']).first()
     if user:
-        return jsonify({'message': 'User "%s" already exists!' % json['user_name']})
+        return jsonify({'message': 'User "%s" already exists!' % json['user_name']}),401
     user = Users(user_name=json['user_name'], password=json['password'])
     try:
         db.session.add(user)
@@ -90,6 +91,35 @@ def login():
         return jsonify({'message': 'Logged in as %s.' % user.user_name ,'access_token': access_token})
     else:
         return jsonify({'message': 'Wrong credentials'})
+
+@app.route("/add_comment",methods=['POST'])
+@jwt_required
+def addComment():
+    curUser = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    json = request.get_json()
+    newComment = Comments(owner=curUser.user_id,postId=json['postId'],postOwner=json['postOwner'],text=json['text'])
+    curPost = Goals.query.filter_by(goalId=json['postId'],user_id=json['postOwner']).first()
+    curPost.comments.append(newComment)
+    db.session.add(curPost)
+    db.session.commit()
+    return jsonify({"msg":"success"}),200
+
+@app.route("/remove_goal",methods=['POST'])
+@jwt_required
+def removeGoal():
+    json = request.get_json()
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    post = Goals.query.filter_by(goalId=json['post_id'],user_id=current_user.user_id).first()
+    print(get_jwt_identity())
+    try:
+        current_user.remove_post(post)
+        print([goal.serialize() for goal in current_user.goals])
+        print()
+        #db.session.add(current_user)
+        db.session.commit()
+        return jsonify({'message': 'Post was deleted.'}),200
+    except:
+        return jsonify({'message': 'Something went wrong'}, 500)
 
 
 @app.route('/following', methods=['POST'])
@@ -155,7 +185,7 @@ def addPost():
     name = get_jwt_identity()
     curUser = Users.query.filter_by(user_name=name).first()
     newPost = Goals(user_id=curUser.user_id,goalTitle=json['title'],userName=name,deadline=json['deadline'],text=json['text'])
-    db.session.add(newPost)
+    #db.session.add(newPost)
     curUser.goals.append(newPost)
     db.session.commit()
     return jsonify([_.serialize() for _ in curUser.goals])

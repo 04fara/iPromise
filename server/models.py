@@ -22,13 +22,16 @@ class Users(db.Model):
     user_name = db.Column(db.String(40), index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
-    goals = db.relationship('Goals', backref='author', lazy='dynamic')
+    goals = db.relationship('Goals', lazy='dynamic',cascade="delete,delete-orphan")
 
     followed = db.relationship(
         'Users', secondary=followers,
         primaryjoin=followers.c.follower_id == user_id,
         secondaryjoin=followers.c.followed_id == user_id,
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+    
+    def remove_post(self,post):
+        self.goals.remove(post)
 
     def get_id(self):
         return self.user_id
@@ -91,6 +94,8 @@ class Goals(db.Model):
     timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.utcnow)
     deadline = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text,nullable=False)
+
+    comments = db.relationship('Comments',cascade = "delete, save-update,delete-orphan")
 
     def __repr__(self):
         return jsonify(self.serialize())
