@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/goal_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Title"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/goal_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/goal_title"
+        android:hint="Description"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/goal_deadline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/goal_description"
+        android:hint="Deadline"
+        android:onClick="setDate"
+        android:inputType="datetime" />
+
+    <Button
+        android:id="@+id/goal_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/goal_deadline"
+        android:onClick="submit"
+        android:text="Submit" />
+
+</RelativeLayout>

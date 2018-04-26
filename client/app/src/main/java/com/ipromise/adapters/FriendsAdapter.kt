@@ -1,5 +1,6 @@
-package com.ipromise
+package com.ipromise.adapters
 
+/*
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -8,9 +9,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.google.gson.JsonObject
-import com.ipromise.retrofit.ClientAPI
+import com.ipromise.R
+import com.ipromise.api.ClientAPI
+import com.ipromise.prefs.MyPreferences
+import com.ipromise.api.models.UserModel
 
-class CustomAdapter(private val userList: ArrayList<User>, private val applicationContext: Context) : RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
+class CustomAdapter(private val userList: ArrayList<UserModel>, private val applicationContext: Context) : RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val preferences = MyPreferences(applicationContext)
@@ -47,4 +51,4 @@ class CustomAdapter(private val userList: ArrayList<User>, private val applicati
         val txtTitle = itemView.findViewById<TextView>(R.id.txtTitle)!!
     }
 
-}
+}*/

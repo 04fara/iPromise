@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">iPromise</string>
-    <string name="action_logout">Log out</string>
+    <string name="title_feed">Feed</string>
+    <string name="title_add">Add</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_search">Search</string>
 </resources>
