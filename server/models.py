@@ -32,15 +32,16 @@ class Users(db.Model):
     posts = db.relationship('Posts', backref='author', lazy='dynamic')
 
     def followed_posts(self):
-        own = Posts.query.filter_by(user_id=self.id)
+        own = Posts.query.filter_by(user_name=self.user_name)
         followed = Posts.query.join(
-            followers, (followers.c.followed_id == Posts.user_id)).filter(
-            followers.c.follower_id == self.id)
-        return followed.union(own).order_by(Posts.timestamp.desc())
+            followers,
+            (Users.query.filter_by(user_id=followers.c.followed_id).first().user_name == Posts.user_name)).filter(
+            Users.query.filter_by(user_id=followers.c.follower_id).first().user_name == self.user_name)
+        return followed.union(own).order_by(Posts.timestmp.desc())
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute.')
+        raise AttributeError('password is not a readable attribute')
 
     @password.setter
     def password(self, password):
@@ -80,18 +81,16 @@ class Posts(db.Model):
     user_name = db.Column(db.String(40), db.ForeignKey(Users.user_name), nullable=False, primary_key=True)
     title = db.Column(db.String(40), nullable=False, unique=True)
     description = db.Column(db.String(255), nullable=False)
-    timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.utcnow)
+    timestmp = db.Column(db.DateTime, index=True, nullable=False)
     deadline = db.Column(db.DateTime, nullable=False)
-    received_from = db.Column(db.Integer, db.ForeignKey(Users.user_id))
+
+    # received_from = db.Column(db.Integer, db.ForeignKey(Users.user_id))
 
     @property
     def serialize(self):
         return self.__repr__()
 
     def __repr__(self):
-        if self.received_from is None:
-            return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
-                    'timestamp': self.timestamp, 'deadline': self.deadline}
-        else:
-            return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
-                    'timestamp': self.timestamp, 'deadline': self.deadline, 'received_from': self.received_from}
+        return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
+                'description': self.description, 'timestmp': self.timestmp.strftime('%Y-%m-%d'),
+                'deadline': self.deadline.strftime('%Y-%m-%d')}

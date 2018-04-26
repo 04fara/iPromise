@@ -1,49 +1,33 @@
+from datetime import datetime
+
 from flask import request, jsonify
-from flask_jwt_extended import (
-    get_jwt_identity, jwt_required, create_access_token)
+from flask_jwt_extended import (get_jwt_identity, jwt_required, create_access_token)
 
 from models import Users, app, db, Posts, jwt
+
+db.create_all()
 
 
 @jwt.expired_token_loader
 def expiration():
-    return jsonify({
-        'status': 401,
-        'msg': 'The token has expired'
-    }), 401
+    return jsonify('The token has expired')
 
 
 @jwt.invalid_token_loader
 def invalid():
-    return jsonify({
-        'status': 403,
-        'msg': 'Invalid token'
-    }), 403
+    return jsonify('Invalid token')
 
 
 @jwt.unauthorized_loader
 def unauthorize():
-    return jsonify({
-        'status': 401,
-        'msg': 'Unauthorized'
-    }), 401
-
-
-db.create_all()
+    return jsonify('Unauthorized')
 
 
 @app.route('/user', methods=['GET'])
 @jwt_required
 def index():
-    print(request.headers)
-    print("ASDASD")
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     return jsonify(current_user.serialize)
-    # if not current_user.is_authenticated:
-    #     return str(current_user.user_id)
-    # else:
-    #     login_user(Users.query.get(2))
-    #     return str(current_user.user_id)
     # return file.save(os.path.join(app.static_folder), secure_filename(u'i contain cool text.txt'))
 
 
@@ -52,14 +36,14 @@ def register():
     json = request.get_json()
     user = Users.query.filter_by(user_name=json['user_name']).first()
     if user:
-        return jsonify({'message': 'User "%s" already exists!' % json['user_name']})
+        return jsonify('User "%s" already exists' % json['user_name'])
     user = Users(user_name=json['user_name'], password=json['password'])
     try:
         db.session.add(user)
         db.session.commit()
-        return jsonify({'message': 'User %s was created.' % user.user_name})
+        return jsonify('User %s was created' % user.user_name)
     except:
-        return jsonify({'message': 'Something went wrong'}), 500
+        return jsonify('Something went wrong'), 500
 
 
 @app.route('/login', methods=['POST'])
@@ -67,20 +51,26 @@ def login():
     json = request.get_json()
     user = Users.query.filter_by(user_name=json['user_name']).first()
     if not user:
-        return jsonify({'message': 'User "%s" does not exist!' % json['user_name']})
+        return jsonify('User "%s" does not exist!' % json['user_name'])
     if user is not None and user.verify_password(json['password']):
         access_token = create_access_token(identity=user.user_name)
-        return jsonify({'message': 'Logged in as %s.' % user.user_name, 'access_token': access_token})
+        return jsonify({'message': 'Logged in as %s' % user.user_name, 'access_token': access_token})
     else:
-        return jsonify({'message': 'Wrong credentials'})
+        return jsonify('Wrong credentials')
 
 
-@app.route('/friends', methods=['POST'])
+@app.route('/followers', methods=['POST'])
 @jwt_required
 def users_list():
-    current_user = get_jwt_identity()
-    users = Users.query.order_by(Users.user_name).all()
-    return jsonify([_.serialize for _ in users])
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    return jsonify([_.serialize for _ in current_user.followers])
+
+
+@app.route('/followed', methods=['POST'])
+@jwt_required
+def users_list():
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    return jsonify([_.serialize for _ in current_user.followed])
 
 
 @app.route('/follow', methods=['POST'])
@@ -94,7 +84,7 @@ def follow():
         db.session.commit()
         return str(True)
     except:
-        return jsonify({'message': 'Something went wrong'})
+        return jsonify('Something went wrong')
 
 
 @app.route('/unfollow', methods=['POST'])
@@ -106,9 +96,9 @@ def unfollow():
     try:
         current_user.unfollow(followed)
         db.session.commit()
-        return str(True)
+        return jsonify('Successful')
     except:
-        return jsonify({'message': 'Something went wrong'})
+        return jsonify('Something went wrong')
 
 
 @app.route('/is_following', methods=['POST'])
@@ -118,8 +108,16 @@ def is_following():
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     other_user = Users.query.filter_by(user_name=json['followed']).first()
     if current_user == other_user:
-        return 'It is you'
-    return str(current_user.is_following(other_user))
+        return jsonify('It is you')
+    return jsonify(current_user.is_following(other_user))
+
+
+@app.route("/search_user", methods=['GET'])
+@jwt_required
+def search():
+    json = request.get_json()
+    users = db.session.query(Users).filter(Users.user_name.op("regexp")(json['regexp']))
+    return jsonify([_.serialize for _ in users])
 
 
 @app.route('/add_post', methods=['POST'])
@@ -127,12 +125,18 @@ def is_following():
 def add_post():
     json = request.get_json()
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-    post = Posts(user_name=current_user, title=json['title'], deadline=json['deadline'])
+    now = datetime.now()
+    post = Posts(user_name=current_user.user_name, title=json['title'],
+                 description=json['description'], timestmp='%s-%s-%s' % (now.year, now.month, now.day),
+                 deadline=json['deadline'])
+    print(post.serialize)
     try:
+        db.session.add(post)
         current_user.add_post(post)
-        return jsonify({'message': 'Post was created.'})
+        db.session.commit()
+        return jsonify('Post was created')
     except:
-        return jsonify({'message': 'Something went wrong'}, 500)
+        return jsonify('Something went wrong')
 
 
 @app.route('/remove_post', methods=['POST'])
@@ -142,28 +146,20 @@ def remove_post():
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     post = Posts.query.filter_by(post_id=json['post_id']).first()
     try:
+        db.session.remove(post)
         current_user.remove_post(post)
-        return jsonify({'message': 'Post was deleted.'})
+        db.session.commit()
+        return jsonify('Successful')
     except:
-        return jsonify({'message': 'Something went wrong'}, 500)
+        return jsonify('Something went wrong')
 
 
-@app.route('/get_posts', methods=['POST'])
+@app.route('/get_posts')
 @jwt_required
 def get_posts():
-    json = request.get_json()
-    try:
-        if json['user_name']:
-            return jsonify({
-                'posts':
-                    [_.serialize for _ in
-                     Posts.query.filter_by(user_name=json['user_name']).order_by(Posts.timestamp.desc())]
-            })
-        else:
-            current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-            return jsonify({'posts': [_.serialize for _ in current_user.followed_posts]})
-    except:
-        return jsonify({'message': 'Something went wrong'})
+    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    print([_.serialize for _ in current_user.followed_posts()])
+    return jsonify([_.serialize for _ in current_user.followed_posts()])
 
 
 if __name__ == '__main__':
