@@ -51,6 +51,18 @@ def search():
     users = db.session.query(Users).filter(Users.user_name.op("regexp")(json['regexp']))
     return jsonify([_.serialize for _ in users]),200
 
+@app.route("/getPost",methods=["GET"])
+@jwt_required
+def getPost():
+    json = request.get_json()
+    curUser = Users.query.filter_by(user_name=get_jwt_identity()).first()
+    myPosts = Goals.query.filter_by(user_id = curUser.user_id,postId = json['postId']).first()
+    obj = { 
+        'post': post.serialize(),
+        'comments': [ _.serialize() for _ in post.comments]
+    } 
+    return jsonify(obj),200
+
 @app.route('/register', methods=['POST'])
 def register():
 
@@ -113,8 +125,8 @@ def removeGoal():
     print(get_jwt_identity())
     try:
         current_user.remove_post(post)
-        print([goal.serialize() for goal in current_user.goals])
-        print()
+        #print([goal.serialize() for goal in current_user.goals])
+        #print()
         #db.session.add(current_user)
         db.session.commit()
         return jsonify({'message': 'Post was deleted.'}),200
@@ -185,7 +197,7 @@ def addPost():
     name = get_jwt_identity()
     curUser = Users.query.filter_by(user_name=name).first()
     newPost = Goals(user_id=curUser.user_id,goalTitle=json['title'],userName=name,deadline=json['deadline'],text=json['text'])
-    #db.session.add(newPost)
+    db.session.add(newPost)
     curUser.goals.append(newPost)
     db.session.commit()
     return jsonify([_.serialize() for _ in curUser.goals])
