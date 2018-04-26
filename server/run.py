@@ -61,14 +61,14 @@ def login():
 
 @app.route('/followers', methods=['POST'])
 @jwt_required
-def users_list():
+def followers_list():
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     return jsonify([_.serialize for _ in current_user.followers])
 
 
 @app.route('/followed', methods=['POST'])
 @jwt_required
-def users_list():
+def followed_list():
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     return jsonify([_.serialize for _ in current_user.followed])
 
