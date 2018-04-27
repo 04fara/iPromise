@@ -34,7 +34,7 @@ class AddPostActivity : AppCompatActivity() {
                 .append("description", goal_description.text.toString())
                 .append("deadline", goal_deadline.text.toString())
                 .build()
-        RetrofitController().addPost(MyPreferences(applicationContext).getToken(), json)
+        RetrofitController().addPost(this, MyPreferences(applicationContext).getToken(), json)
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()

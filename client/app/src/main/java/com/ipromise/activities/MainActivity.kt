@@ -13,6 +13,7 @@ import com.ipromise.R
 import com.ipromise.adapters.FragmentAdapter
 import com.ipromise.fragments.FeedFragment
 import com.ipromise.fragments.ProfileFragment
+import com.ipromise.prefs.MyPreferences
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -77,7 +78,8 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
                 finish()
-                Toast.makeText(this, "LOGOUT", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                MyPreferences(this).setToken("")
                 return true
             }
             else -> super.onOptionsItemSelected(item)

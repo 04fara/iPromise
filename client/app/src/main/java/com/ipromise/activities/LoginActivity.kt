@@ -21,7 +21,7 @@ class LoginActivity : AppCompatActivity() {
         val json = JSONBuilder().append("user_name", username.text.toString())
                 .append("password", password.text.toString())
                 .build()
-        retrofitController.register(json)
+        retrofitController.register(this, json)
     }
 
     fun login(view: View) {

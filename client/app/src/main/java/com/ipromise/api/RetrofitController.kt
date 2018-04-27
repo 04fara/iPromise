@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.google.gson.JsonObject
 import com.ipromise.activities.MainActivity
 import com.ipromise.adapters.PostAdapter
@@ -20,7 +21,7 @@ import retrofit2.Response
 class RetrofitController {
     private val service = RetrofitInstance.create()
 
-    fun register(json: JsonObject) {
+    fun register(activity: Activity, json: JsonObject) {
         service.register(json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -29,8 +30,7 @@ class RetrofitController {
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                         if (response.isSuccessful) {
-                            val msg = response.body()?.string()
-                            print(msg)
+                            Toast.makeText(activity.applicationContext, "Registered successfully", Toast.LENGTH_SHORT).show()
                         }
                     }
                 })
@@ -44,11 +44,13 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<ResponseTokenModel>, response: Response<ResponseTokenModel>) {
-                        if (response.isSuccessful) preferences.setToken(response.body()?.access_token)
-
-                        val intent = Intent(activity, MainActivity::class.java)
-                        activity.startActivity(intent)
-                        activity.finish()
+                        if (response.isSuccessful) {
+                            preferences.setToken(response.body()?.access_token)
+                            val intent = Intent(activity, MainActivity::class.java)
+                            Toast.makeText(activity.applicationContext, "Logged in successfully", Toast.LENGTH_SHORT).show()
+                            activity.startActivity(intent)
+                            activity.finish()
+                        }
                     }
                 })
     }
@@ -172,7 +174,7 @@ class RetrofitController {
                 })
     }
 
-    fun addPost(token: String, json: JsonObject) {
+    fun addPost(activity: Activity, token: String, json: JsonObject) {
         service.addPost(token, json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -180,7 +182,7 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        response.isSuccessful
+                        if (response.isSuccessful) Toast.makeText(activity.applicationContext, "Post created successfully", Toast.LENGTH_SHORT).show()
                     }
                 })
     }
