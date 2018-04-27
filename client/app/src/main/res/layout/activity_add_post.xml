@@ -25,8 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/goal_description"
         android:hint="Deadline"
-        android:onClick="setDate"
-        android:inputType="datetime" />
+        android:inputType="date" />
 
     <Button
         android:id="@+id/goal_submit"

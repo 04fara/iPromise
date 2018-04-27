@@ -2,6 +2,7 @@ package com.ipromise.api
 
 import android.app.Activity
 import android.content.Intent
+import android.support.v4.widget.SwipeRefreshLayout
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -29,9 +30,8 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        if (response.isSuccessful) {
-                            Toast.makeText(activity.applicationContext, "Registered successfully", Toast.LENGTH_SHORT).show()
-                        }
+                        if (response.isSuccessful) Toast.makeText(activity.applicationContext, "Registered successfully", Toast.LENGTH_SHORT).show()
+                        else Toast.makeText(activity.applicationContext, "User already exists", Toast.LENGTH_SHORT).show()
                     }
                 })
     }
@@ -46,11 +46,10 @@ class RetrofitController {
                     override fun onResponse(call: Call<ResponseTokenModel>, response: Response<ResponseTokenModel>) {
                         if (response.isSuccessful) {
                             preferences.setToken(response.body()?.access_token)
-                            val intent = Intent(activity, MainActivity::class.java)
                             Toast.makeText(activity.applicationContext, "Logged in successfully", Toast.LENGTH_SHORT).show()
-                            activity.startActivity(intent)
+                            activity.startActivity(Intent(activity, MainActivity::class.java))
                             activity.finish()
-                        }
+                        } else Toast.makeText(activity.applicationContext, "Wrong credentials", Toast.LENGTH_SHORT).show()
                     }
                 })
     }
@@ -101,10 +100,11 @@ class RetrofitController {
                             val msg = response.body()!!.message
                             print(msg)
                             button.text = when {
-                                msg.equals("true") -> "Following"
-                                msg.equals("It is you") -> "It is you"
+                                msg == "true" -> "Following"
+                                msg == "It is you" -> "It is you"
                                 else -> "Follow"
                             }
+                            if (msg == "It is you") button.isEnabled = false
                         }
                     }
                 })
@@ -182,12 +182,16 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        if (response.isSuccessful) Toast.makeText(activity.applicationContext, "Post created successfully", Toast.LENGTH_SHORT).show()
+                        if (response.isSuccessful) {
+                            Toast.makeText(activity.applicationContext, "Post created successfully", Toast.LENGTH_SHORT).show()
+                            activity.startActivity(Intent(activity, MainActivity::class.java))
+                            activity.finish()
+                        } else Toast.makeText(activity.applicationContext, "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
                 })
     }
 
-    fun fetchPosts(token: String, json: JsonObject, posts: ArrayList<PostModel>, adapter: PostAdapter) {
+    fun fetchPosts(token: String, json: JsonObject, swipeContainer: SwipeRefreshLayout?, posts: ArrayList<PostModel>, adapter: PostAdapter) {
         service.getPosts(token, json)
                 .enqueue(object : Callback<List<PostModel>> {
                     override fun onFailure(call: Call<List<PostModel>>, t: Throwable) {
@@ -200,6 +204,7 @@ class RetrofitController {
                             posts.addAll(response.body() as ArrayList<PostModel>)
                             adapter.notifyDataSetChanged()
                         }
+                        swipeContainer?.isRefreshing = false
                     }
                 })
     }

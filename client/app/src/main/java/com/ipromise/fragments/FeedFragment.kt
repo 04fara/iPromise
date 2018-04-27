@@ -21,13 +21,13 @@ class FeedFragment : Fragment() {
         val adapter: PostAdapter
         val view = inflater.inflate(R.layout.tab1_fragment, container, false)
         val recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
+        val swipeContainer = view.findViewById(R.id.swipeContainer) as SwipeRefreshLayout
         recyclerView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
         adapter = PostAdapter(posts)
         recyclerView.adapter = adapter
-        RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), posts, adapter)
-        val swipeContainer = view.findViewById(R.id.swipeContainer) as SwipeRefreshLayout
+        RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
         swipeContainer.setOnRefreshListener({
-            RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), posts, adapter)
+            RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
         })
         swipeContainer.setColorSchemeResources(android.R.color.black)
 

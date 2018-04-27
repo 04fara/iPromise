@@ -1,10 +1,10 @@
 package com.ipromise.activities
 
 import android.app.DatePickerDialog
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.EditText
 import com.ipromise.R
 import com.ipromise.api.RetrofitController
 import com.ipromise.prefs.MyPreferences
@@ -17,6 +17,8 @@ class AddPostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
+
+        findViewById<EditText>(R.id.goal_deadline).setOnFocusChangeListener { v, hasFocus -> if (hasFocus) setDate(v) }
     }
 
     fun setDate(view: View) {
@@ -35,8 +37,5 @@ class AddPostActivity : AppCompatActivity() {
                 .append("deadline", goal_deadline.text.toString())
                 .build()
         RetrofitController().addPost(this, MyPreferences(applicationContext).getToken(), json)
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
     }
 }

@@ -49,7 +49,7 @@ class ProfileFragment : Fragment() {
         val adapter = PostAdapter(posts)
         recyclerView!!.adapter = adapter
         RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(),
-                JSONBuilder().append("user_name", usernameField!!.text.toString()).build(), posts, adapter)
+                JSONBuilder().append("user_name", usernameField!!.text.toString()).build(), null, posts, adapter)
     }
 
     fun getFollowersList(view: View) {
