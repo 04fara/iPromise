@@ -1,6 +1,7 @@
 package com.ipromise.activities
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -34,5 +35,8 @@ class AddPostActivity : AppCompatActivity() {
                 .append("deadline", goal_deadline.text.toString())
                 .build()
         RetrofitController().addPost(MyPreferences(applicationContext).getToken(), json)
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

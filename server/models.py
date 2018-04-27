@@ -20,7 +20,7 @@ followers = db.Table('followers',
 
 class Users(db.Model):
     user_id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    user_name = db.Column(db.String(40), index=True, nullable=False, unique=True)
+    user_name = db.Column(db.String(40), index=True, nullable=False, primary_key=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
     followed = db.relationship(
@@ -31,13 +31,17 @@ class Users(db.Model):
 
     posts = db.relationship('Posts', backref='author', lazy='dynamic')
 
-    def followed_posts(self):
-        own = Posts.query.filter_by(user_name=self.user_name)
+    def get_posts(self, feed):
         followed = Posts.query.join(
-            followers,
-            (Users.query.filter_by(user_id=followers.c.followed_id).first().user_name == Posts.user_name)).filter(
-            Users.query.filter_by(user_id=followers.c.follower_id).first().user_name == self.user_name)
-        return followed.union(own).order_by(Posts.timestmp.desc())
+            followers, (followers.c.followed_id == Posts.user_id)).filter(
+            followers.c.follower_id == self.user_id)
+        own = Posts.query.filter_by(user_id=self.user_id)
+        followed = [_.serialize for _ in followed.order_by(Posts.timestmp.desc()).all()]
+        own = [_.serialize for _ in own.order_by(Posts.timestmp.desc()).all()]
+        if feed:
+            return sorted(followed + own, key=lambda k: k['timestmp'])
+        else:
+            return sorted(own, key=lambda k: k['timestmp'])
 
     @property
     def password(self):
@@ -78,7 +82,7 @@ class Users(db.Model):
 
 class Posts(db.Model):
     post_id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    user_name = db.Column(db.String(40), db.ForeignKey(Users.user_name), nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     title = db.Column(db.String(40), nullable=False, unique=True)
     description = db.Column(db.String(255), nullable=False)
     timestmp = db.Column(db.DateTime, index=True, nullable=False)
@@ -91,6 +95,7 @@ class Posts(db.Model):
         return self.__repr__()
 
     def __repr__(self):
-        return {'post_id': self.post_id, 'user_name': self.user_name, 'title': self.user_name,
-                'description': self.description, 'timestmp': self.timestmp.strftime('%Y-%m-%d'),
-                'deadline': self.deadline.strftime('%Y-%m-%d')}
+        return {'post_id': self.post_id, 'user_id': self.user_id,
+                'user_name': Users.query.filter_by(user_id=self.user_id).first().user_name,
+                'title': self.title, 'description': self.description,
+                'timestmp': self.timestmp, 'deadline': self.deadline}

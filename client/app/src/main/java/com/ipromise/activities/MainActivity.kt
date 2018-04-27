@@ -3,6 +3,7 @@ package com.ipromise.activities
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
@@ -86,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupViewPager(viewPager: ViewPager) {
         val adapter = FragmentAdapter(supportFragmentManager)
         adapter.addFragment(FeedFragment(), "Feed")
+        adapter.addFragment(Fragment(), "Null")
         adapter.addFragment(ProfileFragment(), "My Profile")
         viewPager.adapter = adapter
     }

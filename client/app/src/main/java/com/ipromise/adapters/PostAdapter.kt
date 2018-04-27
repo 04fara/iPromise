@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import com.ipromise.R
 import com.ipromise.api.models.PostModel
@@ -18,7 +17,7 @@ class PostAdapter(private val postList: ArrayList<PostModel>) : RecyclerView.Ada
         holder.description.text = postList[position].description
         holder.deadline.text = postList[position].deadline
         holder.cardView.setCardBackgroundColor(R.drawable.tape)
-        val button = holder.delete
+        //val button = holder.delete
 
         /*button.setOnClickListener({
             if (button.text.toString() == "Follow") RetrofitController().follow(button, json)
@@ -36,7 +35,7 @@ class PostAdapter(private val postList: ArrayList<PostModel>) : RecyclerView.Ada
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val delete: Button = itemView.findViewById(R.id.post_delete)
+        //val delete: Button = itemView.findViewById(R.id.post_delete)
         val username: TextView = itemView.findViewById(R.id.post_username)
         val title: TextView = itemView.findViewById(R.id.post_title)
         val description: TextView = itemView.findViewById(R.id.post_description)

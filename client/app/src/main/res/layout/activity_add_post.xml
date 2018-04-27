@@ -32,6 +32,7 @@
         android:id="@+id/goal_submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_below="@+id/goal_deadline"
         android:onClick="submit"
         android:text="Submit" />

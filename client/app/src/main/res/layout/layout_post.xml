@@ -17,18 +17,28 @@
             android:orientation="vertical"
             android:padding="0dp">
 
-            <Button
+            <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/tape" />
+
+            <!--Button
                 android:id="@+id/post_delete"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerInParent="true"
-                android:text="Delete" />
+                android:text="Delete" /-->
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_alignParentBottom="true"
                 android:orientation="vertical"
                 android:padding="10dp">
 

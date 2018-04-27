@@ -23,7 +23,7 @@ def unauthorize():
     return jsonify('Unauthorized')
 
 
-@app.route('/user', methods=['GET'])
+@app.route('/user')
 @jwt_required
 def index():
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
@@ -78,7 +78,7 @@ def followed_list():
 def follow():
     json = request.get_json()
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-    followed = Users.query.filter_by(user_name=json['followed']).first()
+    followed = Users.query.filter_by(user_name=json['other_user']).first()
     try:
         current_user.follow(followed)
         db.session.commit()
@@ -92,7 +92,7 @@ def follow():
 def unfollow():
     json = request.get_json()
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-    followed = Users.query.filter_by(user_name=json['followed']).first()
+    followed = Users.query.filter_by(user_name=json['other_user']).first()
     try:
         current_user.unfollow(followed)
         db.session.commit()
@@ -106,13 +106,13 @@ def unfollow():
 def is_following():
     json = request.get_json()
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-    other_user = Users.query.filter_by(user_name=json['followed']).first()
+    other_user = Users.query.filter_by(user_name=json['other_user']).first()
     if current_user == other_user:
-        return jsonify('It is you')
-    return jsonify(current_user.is_following(other_user))
+        return jsonify({'message': 'It is you'})
+    return jsonify({'message': current_user.is_following(other_user)})
 
 
-@app.route("/search_user", methods=['GET'])
+@app.route("/search_user", methods=['POST'])
 @jwt_required
 def search():
     json = request.get_json()
@@ -126,10 +126,9 @@ def add_post():
     json = request.get_json()
     current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
     now = datetime.now()
-    post = Posts(user_name=current_user.user_name, title=json['title'],
+    post = Posts(user_id=current_user.user_id, title=json['title'],
                  description=json['description'], timestmp='%s-%s-%s' % (now.year, now.month, now.day),
                  deadline=json['deadline'])
-    print(post.serialize)
     try:
         db.session.add(post)
         current_user.add_post(post)
@@ -154,12 +153,17 @@ def remove_post():
         return jsonify('Something went wrong')
 
 
-@app.route('/get_posts')
+@app.route('/get_posts', methods=['POST'])
 @jwt_required
 def get_posts():
-    current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
-    print([_.serialize for _ in current_user.followed_posts()])
-    return jsonify([_.serialize for _ in current_user.followed_posts()])
+    json = request.get_json()
+    if 'user_name' in json:
+        current_user = Users.query.filter_by(user_name=json['user_name']).first()
+        feed = False
+    else:
+        current_user = Users.query.filter_by(user_name=get_jwt_identity()).first()
+        feed = True
+    return jsonify(current_user.get_posts(feed))
 
 
 if __name__ == '__main__':
