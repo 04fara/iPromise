@@ -28,6 +28,7 @@ class AddPostActivity : AppCompatActivity() {
         val year = calendar.get(Calendar.YEAR)
         val picker = DatePickerDialog(this@AddPostActivity,
                 DatePickerDialog.OnDateSetListener { _, yearChosen, monthOfYear, dayOfMonth -> goal_deadline.setText("$yearChosen-${monthOfYear + 1}-$dayOfMonth") }, year, month, day)
+        picker.datePicker.minDate = System.currentTimeMillis()
         picker.show()
     }
 

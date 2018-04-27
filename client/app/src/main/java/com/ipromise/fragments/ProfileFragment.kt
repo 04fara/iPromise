@@ -24,7 +24,7 @@ class ProfileFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val token = MyPreferences(activity!!.applicationContext).getToken()
-        val view = inflater.inflate(R.layout.tab2_fragment, container, false)
+        val view = inflater.inflate(R.layout.profile_page_fragment, container, false)
         usernameField = view.findViewById<TextView>(R.id.profile_username)
         recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
         recyclerView!!.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)

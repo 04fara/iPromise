@@ -19,7 +19,7 @@ class FeedFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val posts = ArrayList<PostModel>()
         val adapter: PostAdapter
-        val view = inflater.inflate(R.layout.tab1_fragment, container, false)
+        val view = inflater.inflate(R.layout.feed_fragment, container, false)
         val recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
         val swipeContainer = view.findViewById(R.id.swipeContainer) as SwipeRefreshLayout
         recyclerView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
