@@ -21,7 +21,6 @@ class UserAdapter(private val userList: ArrayList<UserModel>,
         val button = holder.button
         val json = JSONBuilder().append("other_user", holder.username.text as String).build()
         RetrofitController().isFollowing(token, json, button)
-
         button.setOnClickListener({
             if (button.text.toString() == "Follow") RetrofitController().follow(token, json, button)
             else RetrofitController().unfollow(token, json, button)

@@ -1,31 +1,26 @@
 package com.ipromise.activities
 
+import android.app.Fragment
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import com.ipromise.R
-import com.ipromise.adapters.FragmentAdapter
 import com.ipromise.fragments.FeedFragment
 import com.ipromise.fragments.ProfileFragment
 import com.ipromise.prefs.MyPreferences
 import kotlinx.android.synthetic.main.activity_main.*
 
-
 class MainActivity : AppCompatActivity() {
-    private var mSectionsPageAdapter: FragmentAdapter? = null
-
-    private var mViewPager: ViewPager? = null
+    private var fragmentList: ArrayList<Fragment>? = null
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
                 setTitle(R.string.title_feed)
+                replaceFragment(fragmentList!![0])
                 return@OnNavigationItemSelectedListener true
             }
 
@@ -37,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
             R.id.navigation_profile -> {
                 setTitle(R.string.title_profile)
+                replaceFragment(fragmentList!![1])
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -48,17 +44,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mSectionsPageAdapter = FragmentAdapter(supportFragmentManager)
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = findViewById<View>(R.id.viewpager) as ViewPager
-        setupViewPager(mViewPager!!)
+        setupFragmentList()
+        replaceFragment(fragmentList!![0])
 
         navigation.onNavigationItemSelectedListener = mOnNavigationItemSelectedListener
-        navigation.run {
-            setTextVisibility(false)
-            setupWithViewPager(mViewPager)
-        }
+        navigation.setTextVisibility(false)
 
     }
 
@@ -86,11 +76,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupViewPager(viewPager: ViewPager) {
-        val adapter = FragmentAdapter(supportFragmentManager)
-        adapter.addFragment(FeedFragment(), "Feed")
-        adapter.addFragment(Fragment(), "Null")
-        adapter.addFragment(ProfileFragment(), "My Profile")
-        viewPager.adapter = adapter
+    private fun replaceFragment(fragment: Fragment) {
+        val transaction = fragmentManager.beginTransaction()
+        transaction.replace(R.id.viewpager_layout, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun setupFragmentList() {
+        fragmentList = ArrayList()
+        fragmentList!!.add(FeedFragment())
+        fragmentList!!.add(ProfileFragment())
     }
 }

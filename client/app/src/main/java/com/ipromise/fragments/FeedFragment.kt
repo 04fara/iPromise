@@ -1,7 +1,7 @@
 package com.ipromise.fragments
 
+import android.app.Fragment
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -13,7 +13,6 @@ import com.ipromise.adapters.PostAdapter
 import com.ipromise.api.RetrofitController
 import com.ipromise.api.models.PostModel
 import com.ipromise.prefs.MyPreferences
-
 
 class FeedFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -30,7 +29,6 @@ class FeedFragment : Fragment() {
             RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
         })
         swipeContainer.setColorSchemeResources(android.R.color.black)
-
         setHasOptionsMenu(true)
         return view
     }

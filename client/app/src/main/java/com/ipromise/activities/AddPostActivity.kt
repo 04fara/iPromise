@@ -12,12 +12,10 @@ import com.ipromise.utils.JSONBuilder
 import kotlinx.android.synthetic.main.activity_add_post.*
 import java.util.*
 
-
 class AddPostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
-
         findViewById<EditText>(R.id.goal_deadline).setOnFocusChangeListener { v, hasFocus -> if (hasFocus) setDate(v) }
     }
 

@@ -17,12 +17,6 @@ class PostAdapter(private val postList: ArrayList<PostModel>) : RecyclerView.Ada
         holder.description.text = postList[position].description
         holder.deadline.text = postList[position].deadline
         holder.cardView.setCardBackgroundColor(R.drawable.tape)
-        //val button = holder.delete
-
-        /*button.setOnClickListener({
-            if (button.text.toString() == "Follow") RetrofitController().follow(button, json)
-            else RetrofitController().unfollow(button, json)
-        })*/
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,7 +29,6 @@ class PostAdapter(private val postList: ArrayList<PostModel>) : RecyclerView.Ada
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        //val delete: Button = itemView.findViewById(R.id.post_delete)
         val username: TextView = itemView.findViewById(R.id.post_username)
         val title: TextView = itemView.findViewById(R.id.post_title)
         val description: TextView = itemView.findViewById(R.id.post_description)

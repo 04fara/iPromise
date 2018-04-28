@@ -3,6 +3,7 @@ package com.ipromise.api
 import android.app.Activity
 import android.content.Intent
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -63,8 +64,8 @@ class RetrofitController {
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                         if (response.isSuccessful) {
-                            val msg = response.body()?.string()
-                            msg.equals("True")
+                            val message = response.body()?.string()
+                            message.equals("True")
                             button.text = "Following"
                         }
                     }
@@ -80,8 +81,8 @@ class RetrofitController {
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                         if (response.isSuccessful) {
-                            val msg = response.body()?.string()
-                            msg.equals("True")
+                            val message = response.body()?.string()
+                            message.equals("True")
                             button.text = "Follow"
                         }
                     }
@@ -97,14 +98,16 @@ class RetrofitController {
 
                     override fun onResponse(call: Call<ResponseTokenModel>, response: Response<ResponseTokenModel>) {
                         if (response.isSuccessful) {
-                            val msg = response.body()!!.message
-                            print(msg)
-                            button.text = when {
-                                msg == "true" -> "Following"
-                                msg == "It is you" -> "It is you"
+                            val message = response.body()!!.message
+                            print(message)
+                            button.text = when (message) {
+                                "true" -> "Following"
+                                "It is you" -> {
+                                    button.isEnabled = false
+                                    "It is you"
+                                }
                                 else -> "Follow"
                             }
-                            if (msg == "It is you") button.isEnabled = false
                         }
                     }
                 })
@@ -131,11 +134,8 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
-                        if (response.isSuccessful) {
-                            users.clear()
-                            users.addAll(response.body() as ArrayList<UserModel>)
-                            adapter.notifyDataSetChanged()
-                        }
+                        if (response.isSuccessful)
+                            notifyDataSetChanged(users, response.body() as ArrayList<UserModel>, adapter)
                     }
                 })
     }
@@ -148,11 +148,8 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
-                        if (response.isSuccessful) {
-                            users.clear()
-                            users.addAll(response.body() as ArrayList<UserModel>)
-                            adapter.notifyDataSetChanged()
-                        }
+                        if (response.isSuccessful)
+                            notifyDataSetChanged(users, response.body() as ArrayList<UserModel>, adapter)
                     }
                 })
     }
@@ -165,11 +162,8 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
-                        if (response.isSuccessful) {
-                            users.clear()
-                            users.addAll(response.body() as ArrayList<UserModel>)
-                            adapter.notifyDataSetChanged()
-                        }
+                        if (response.isSuccessful)
+                            notifyDataSetChanged(users, response.body() as ArrayList<UserModel>, adapter)
                     }
                 })
     }
@@ -199,13 +193,16 @@ class RetrofitController {
                     }
 
                     override fun onResponse(call: Call<List<PostModel>>, response: Response<List<PostModel>>) {
-                        if (response.isSuccessful) {
-                            posts.clear()
-                            posts.addAll(response.body() as ArrayList<PostModel>)
-                            adapter.notifyDataSetChanged()
-                        }
+                        if (response.isSuccessful)
+                            notifyDataSetChanged(posts, response.body() as ArrayList<PostModel>, adapter)
                         swipeContainer?.isRefreshing = false
                     }
                 })
+    }
+
+    fun <T, U : RecyclerView.ViewHolder, V : RecyclerView.Adapter<U>> notifyDataSetChanged(list: ArrayList<T>, data: ArrayList<T>, adapter: V) {
+        list.clear()
+        list.addAll(data)
+        adapter.notifyDataSetChanged()
     }
 }

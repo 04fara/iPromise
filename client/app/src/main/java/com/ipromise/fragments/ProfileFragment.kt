@@ -1,7 +1,7 @@
 package com.ipromise.fragments
 
+import android.app.Fragment
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
@@ -29,12 +29,12 @@ class ProfileFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
         recyclerView!!.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
         RetrofitController().getUserInfo(token, usernameField)
-        val profile_posts_button = view.findViewById<Button>(R.id.profile_posts)
-        val profile_followers_button = view.findViewById<Button>(R.id.profile_followers)
-        val profile_followed_button = view.findViewById<Button>(R.id.profile_followed)
-        profile_posts_button.setOnClickListener({ getUserPosts(view) })
-        profile_followers_button.setOnClickListener({ getFollowersList(view) })
-        profile_followed_button.setOnClickListener({ getFollowedList(view) })
+        val profilePosts = view.findViewById<Button>(R.id.profile_posts)
+        val profileFollowers = view.findViewById<Button>(R.id.profile_followers)
+        val profileFollowed = view.findViewById<Button>(R.id.profile_followed)
+        profilePosts.setOnClickListener({ getUserPosts(view) })
+        profileFollowers.setOnClickListener({ getFollowersList(view) })
+        profileFollowed.setOnClickListener({ getFollowedList(view) })
         setHasOptionsMenu(true)
         return view
     }
