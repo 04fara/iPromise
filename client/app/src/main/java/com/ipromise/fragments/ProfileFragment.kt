@@ -28,7 +28,7 @@ class ProfileFragment : Fragment() {
         usernameField = view.findViewById<TextView>(R.id.profile_username)
         recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
         recyclerView!!.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
-        RetrofitController().getUserInfo(token, usernameField)
+        RetrofitController().getUserInfo(activity, token, usernameField)
         val profilePosts = view.findViewById<Button>(R.id.profile_posts)
         val profileFollowers = view.findViewById<Button>(R.id.profile_followers)
         val profileFollowed = view.findViewById<Button>(R.id.profile_followed)
@@ -48,21 +48,21 @@ class ProfileFragment : Fragment() {
         val posts = ArrayList<PostModel>()
         val adapter = PostAdapter(posts)
         recyclerView!!.adapter = adapter
-        RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(),
+        RetrofitController().fetchPosts(activity, MyPreferences(activity!!.applicationContext).getToken(),
                 JSONBuilder().append("user_name", usernameField!!.text.toString()).build(), null, posts, adapter)
     }
 
     fun getFollowersList(view: View) {
         val users = ArrayList<UserModel>()
-        val adapter = UserAdapter(users, activity!!.applicationContext)
+        val adapter = UserAdapter(users, activity)
         recyclerView!!.adapter = adapter
-        RetrofitController().getFollowersList(MyPreferences(activity!!.applicationContext).getToken(), users, adapter)
+        RetrofitController().getFollowersList(activity, MyPreferences(activity!!.applicationContext).getToken(), users, adapter)
     }
 
     fun getFollowedList(view: View) {
         val users = ArrayList<UserModel>()
-        val adapter = UserAdapter(users, activity!!.applicationContext)
+        val adapter = UserAdapter(users, activity)
         recyclerView!!.adapter = adapter
-        RetrofitController().getFollowedList(MyPreferences(activity!!.applicationContext).getToken(), users, adapter)
+        RetrofitController().getFollowedList(activity, MyPreferences(activity!!.applicationContext).getToken(), users, adapter)
     }
 }

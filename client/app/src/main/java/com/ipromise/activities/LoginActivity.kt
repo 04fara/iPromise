@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
     private val retrofitController = RetrofitController()
+    private var loginPage = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,16 +19,26 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun register(view: View) {
-        val json = JSONBuilder().append("user_name", username.text.toString())
-                .append("password", password.text.toString())
-                .build()
-        retrofitController.register(this, json)
+        when (loginPage) {
+            true -> {
+                button.text = "Register"
+                register.text = "Login"
+            }
+            else -> {
+                button.text = "Login"
+                register.text = "Register"
+            }
+        }
+        username.text.clear()
+        password.text.clear()
+        loginPage = !loginPage
     }
 
-    fun login(view: View) {
+    fun onClick(view: View) {
         val json = JSONBuilder().append("user_name", username.text.toString())
                 .append("password", password.text.toString())
                 .build()
-        retrofitController.login(this, MyPreferences(applicationContext), json)
+        if (loginPage) retrofitController.login(this, MyPreferences(applicationContext), json)
+        else retrofitController.register(this, view, json)
     }
 }

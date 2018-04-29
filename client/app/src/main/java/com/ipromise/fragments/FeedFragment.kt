@@ -24,9 +24,9 @@ class FeedFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
         adapter = PostAdapter(posts)
         recyclerView.adapter = adapter
-        RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
+        RetrofitController().fetchPosts(activity, MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
         swipeContainer.setOnRefreshListener({
-            RetrofitController().fetchPosts(MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
+            RetrofitController().fetchPosts(activity, MyPreferences(activity!!.applicationContext).getToken(), JsonObject(), swipeContainer, posts, adapter)
         })
         swipeContainer.setColorSchemeResources(android.R.color.black)
         setHasOptionsMenu(true)

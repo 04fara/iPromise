@@ -34,7 +34,7 @@ class SearchActivity : AppCompatActivity() {
                 val json = JSONBuilder()
                         .append("regexp", searchField.text.toString())
                         .build()
-                RetrofitController().searchUsers(MyPreferences(applicationContext).getToken(), json, users, adapter)
+                RetrofitController().searchUsers(this@SearchActivity, MyPreferences(applicationContext).getToken(), json, users, adapter)
             }
         })
     }

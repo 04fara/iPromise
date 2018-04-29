@@ -1,6 +1,6 @@
 package com.ipromise.adapters
 
-import android.content.Context
+import android.app.Activity
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -14,16 +14,16 @@ import com.ipromise.prefs.MyPreferences
 import com.ipromise.utils.JSONBuilder
 
 class UserAdapter(private val userList: ArrayList<UserModel>,
-                  private val applicationContext: Context) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+                  private val activity: Activity) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val token = MyPreferences(applicationContext).getToken()
+        val token = MyPreferences(activity.applicationContext).getToken()
         holder.username.text = userList[position].user_name
         val button = holder.button
         val json = JSONBuilder().append("other_user", holder.username.text as String).build()
-        RetrofitController().isFollowing(token, json, button)
+        RetrofitController().isFollowing(activity, token, json, button)
         button.setOnClickListener({
-            if (button.text.toString() == "Follow") RetrofitController().follow(token, json, button)
-            else RetrofitController().unfollow(token, json, button)
+            if (button.text.toString() == "Follow") RetrofitController().follow(activity, token, json, button)
+            else RetrofitController().unfollow(activity, token, json, button)
         })
     }
 

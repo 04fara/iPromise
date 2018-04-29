@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.google.gson.JsonObject
+import com.ipromise.activities.LoginActivity
 import com.ipromise.activities.MainActivity
 import com.ipromise.adapters.PostAdapter
 import com.ipromise.adapters.UserAdapter
@@ -23,15 +25,18 @@ import retrofit2.Response
 class RetrofitController {
     private val service = RetrofitInstance.create()
 
-    fun register(activity: Activity, json: JsonObject) {
+    fun register(activity: LoginActivity, view: View, json: JsonObject) {
         service.register(json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        if (response.isSuccessful) Toast.makeText(activity.applicationContext, "Registered successfully", Toast.LENGTH_SHORT).show()
+                        if (response.isSuccessful) {
+                            Toast.makeText(activity.applicationContext, "Registered successfully", Toast.LENGTH_SHORT).show()
+                            activity.register(view)
+                        }
                         else Toast.makeText(activity.applicationContext, "User already exists", Toast.LENGTH_SHORT).show()
                     }
                 })
@@ -41,7 +46,7 @@ class RetrofitController {
         service.login(json)
                 .enqueue(object : Callback<ResponseTokenModel> {
                     override fun onFailure(call: Call<ResponseTokenModel>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseTokenModel>, response: Response<ResponseTokenModel>) {
@@ -55,11 +60,11 @@ class RetrofitController {
                 })
     }
 
-    fun follow(token: String, json: JsonObject, button: Button) {
+    fun follow(activity: Activity, token: String, json: JsonObject, button: Button) {
         service.followUser(token, json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -72,11 +77,11 @@ class RetrofitController {
                 })
     }
 
-    fun unfollow(token: String, json: JsonObject, button: Button) {
+    fun unfollow(activity: Activity, token: String, json: JsonObject, button: Button) {
         service.unfollowUser(token, json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -89,11 +94,11 @@ class RetrofitController {
                 })
     }
 
-    fun isFollowing(token: String, json: JsonObject, button: Button) {
+    fun isFollowing(activity: Activity, token: String, json: JsonObject, button: Button) {
         service.isFollowingUser(token, json)
                 .enqueue(object : Callback<ResponseTokenModel> {
                     override fun onFailure(call: Call<ResponseTokenModel>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseTokenModel>, response: Response<ResponseTokenModel>) {
@@ -113,11 +118,11 @@ class RetrofitController {
                 })
     }
 
-    fun getUserInfo(token: String, username: TextView?) {
+    fun getUserInfo(activity: Activity, token: String, username: TextView?) {
         service.getUserInfo(token)
                 .enqueue(object : Callback<UserModel> {
                     override fun onFailure(call: Call<UserModel>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<UserModel>, response: Response<UserModel>) {
@@ -126,11 +131,11 @@ class RetrofitController {
                 })
     }
 
-    fun searchUsers(token: String, json: JsonObject, users: ArrayList<UserModel>, adapter: UserAdapter) {
+    fun searchUsers(activity: Activity, token: String, json: JsonObject, users: ArrayList<UserModel>, adapter: UserAdapter) {
         service.searchUsers(token, json)
                 .enqueue(object : Callback<List<UserModel>> {
                     override fun onFailure(call: Call<List<UserModel>>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
@@ -140,11 +145,11 @@ class RetrofitController {
                 })
     }
 
-    fun getFollowersList(token: String, users: ArrayList<UserModel>, adapter: UserAdapter) {
+    fun getFollowersList(activity: Activity, token: String, users: ArrayList<UserModel>, adapter: UserAdapter) {
         service.getFollowersList(token)
                 .enqueue(object : Callback<List<UserModel>> {
                     override fun onFailure(call: Call<List<UserModel>>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
@@ -154,11 +159,11 @@ class RetrofitController {
                 })
     }
 
-    fun getFollowedList(token: String, users: ArrayList<UserModel>, adapter: UserAdapter) {
+    fun getFollowedList(activity: Activity, token: String, users: ArrayList<UserModel>, adapter: UserAdapter) {
         service.getFollowedList(token)
                 .enqueue(object : Callback<List<UserModel>> {
                     override fun onFailure(call: Call<List<UserModel>>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
@@ -172,7 +177,7 @@ class RetrofitController {
         service.addPost(token, json)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -185,11 +190,11 @@ class RetrofitController {
                 })
     }
 
-    fun fetchPosts(token: String, json: JsonObject, swipeContainer: SwipeRefreshLayout?, posts: ArrayList<PostModel>, adapter: PostAdapter) {
+    fun fetchPosts(activity: Activity, token: String, json: JsonObject, swipeContainer: SwipeRefreshLayout?, posts: ArrayList<PostModel>, adapter: PostAdapter) {
         service.getPosts(token, json)
                 .enqueue(object : Callback<List<PostModel>> {
                     override fun onFailure(call: Call<List<PostModel>>, t: Throwable) {
-                        println("EXCEPTION: " + t.message)
+                        Toast.makeText(activity.applicationContext, "Try again later", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<List<PostModel>>, response: Response<List<PostModel>>) {
